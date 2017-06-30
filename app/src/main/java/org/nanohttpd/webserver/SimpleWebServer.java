@@ -90,68 +90,6 @@ public class SimpleWebServer extends NanoHTTPD {
         LICENCE = text;
     }
 
-    /**
-     * Starts as a standalone file server and waits for Enter.
-     */
-//    public static void main(String[] args) {
-//        // Defaults
-//        int port = 8080;
-//
-//        String host = null; // bind to all interfaces by default
-//        List<File> rootDirs = new ArrayList<File>();
-//        boolean quiet = false;
-//        String cors = null;
-//        Map<String, String> options = new HashMap<String, String>();
-//
-//        // Parse command-line, with short and long versions of the options.
-//        for (int i = 0; i < args.length; ++i) {
-//            if ("-h".equalsIgnoreCase(args[i]) || "--host".equalsIgnoreCase(args[i])) {
-//                host = args[i + 1];
-//            } else if ("-p".equalsIgnoreCase(args[i]) || "--port".equalsIgnoreCase(args[i])) {
-//                port = Integer.parseInt(args[i + 1]);
-//            } else if ("-q".equalsIgnoreCase(args[i]) || "--quiet".equalsIgnoreCase(args[i])) {
-//                quiet = true;
-//            } else if ("-d".equalsIgnoreCase(args[i]) || "--dir".equalsIgnoreCase(args[i])) {
-//                rootDirs.add(new File(args[i + 1]).getAbsoluteFile());
-//            } else if (args[i].startsWith("--cors")) {
-//                cors = "*";
-//                int equalIdx = args[i].indexOf('=');
-//                if (equalIdx > 0) {
-//                    cors = args[i].substring(equalIdx + 1);
-//                }
-//            } else if ("--licence".equalsIgnoreCase(args[i])) {
-//                System.out.println(SimpleWebServer.LICENCE + "\n");
-//            } else if (args[i].startsWith("-X:")) {
-//                int dot = args[i].indexOf('=');
-//                if (dot > 0) {
-//                    String name = args[i].substring(0, dot);
-//                    String value = args[i].substring(dot + 1, args[i].length());
-//                    options.put(name, value);
-//                }
-//            }
-//        }
-//
-//        if (rootDirs.isEmpty()) {
-//            rootDirs.add(new File(".").getAbsoluteFile());
-//        }
-//        options.put("host", host);
-//        options.put("port", "" + port);
-//        options.put("quiet", String.valueOf(quiet));
-//        StringBuilder sb = new StringBuilder();
-//        for (File dir : rootDirs) {
-//            if (sb.length() > 0) {
-//                sb.append(":");
-//            }
-//            try {
-//                sb.append(dir.getCanonicalPath());
-//            } catch (IOException ignored) {
-//            }
-//        }
-//        options.put("home", sb.toString());
-//
-//        ServerRunner.executeInstance(new SimpleWebServer(host, port, rootDirs, quiet, cors));
-//    }
-
     private final boolean quiet;
 
     private final String cors;

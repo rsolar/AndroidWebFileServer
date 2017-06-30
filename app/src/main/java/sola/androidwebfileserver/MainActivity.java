@@ -17,15 +17,18 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import org.nanohttpd.webserver.AndroidWebServer;
+import org.nanohttpd.webserver.SimpleWebServer;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final int DEFAULT_PORT = 8080;
 
     // INSTANCE OF ANDROID WEB FILE SERVER
-//    private SimpleWebServer androidWebFileServer;
-    private AndroidWebServer androidWebFileServer;
+    private SimpleWebServer androidWebFileServer;
     private BroadcastReceiver broadcastReceiverNetworkState;
     private static boolean isStarted = false;
 
@@ -80,7 +83,12 @@ public class MainActivity extends AppCompatActivity {
                 if (port == 0) {
                     throw new Exception();
                 }
-                androidWebFileServer = new AndroidWebServer(port);
+                String host = null; // bind to all interfaces by default
+                List<File> rootDirs = new ArrayList<File>();
+                rootDirs.add(new File(".").getAbsoluteFile());
+                boolean quiet = false;
+                String cors = null;
+                androidWebFileServer = new SimpleWebServer(host, port, rootDirs, quiet, cors);
                 androidWebFileServer.start();
                 return true;
             } catch (Exception e) {
