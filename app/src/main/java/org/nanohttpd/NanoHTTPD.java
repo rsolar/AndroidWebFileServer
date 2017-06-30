@@ -41,7 +41,6 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.Closeable;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -1317,7 +1316,7 @@ public abstract class NanoHTTPD {
     /**
      * HTTP response. Return one of these from serve().
      */
-    public static class Response implements Closeable {
+    public static class Response implements java.io.Closeable {
 
         public interface IStatus {
 
@@ -1964,8 +1963,8 @@ public abstract class NanoHTTPD {
     private static final void safeClose(Object closeable) {
         try {
             if (closeable != null) {
-                if (closeable instanceof Closeable) {
-                    ((Closeable) closeable).close();
+                if (closeable instanceof java.io.Closeable) {
+                    ((java.io.Closeable) closeable).close();
                 } else if (closeable instanceof Socket) {
                     ((Socket) closeable).close();
                 } else if (closeable instanceof ServerSocket) {
