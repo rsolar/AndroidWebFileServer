@@ -191,7 +191,6 @@ public class SimpleWebServer extends NanoHTTPD {
         }
 
         List<String> files = Arrays.asList(f.list(new FilenameFilter() {
-
             @Override
             public boolean accept(File dir, String name) {
                 return new File(dir, name).isFile();
@@ -199,7 +198,6 @@ public class SimpleWebServer extends NanoHTTPD {
         }));
         Collections.sort(files);
         List<String> directories = Arrays.asList(f.list(new FilenameFilter() {
-
             @Override
             public boolean accept(File dir, String name) {
                 return new File(dir, name).isDirectory();
@@ -306,7 +304,7 @@ public class SimpleWebServer extends NanoHTTPD {
                     // No index file, list the directory if it is readable
                     return newFixedLengthResponse(Response.Status.OK, NanoHTTPD.MIME_HTML, listDirectory(uri, f));
                 } else {
-                    return getForbiddenResponse("No directory listing.");
+                    return getForbiddenResponse("Cannot access directory '" + uri + "'.");
                 }
             } else {
                 return respond(headers, session, uri + indexFile);
