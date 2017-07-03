@@ -35,7 +35,7 @@
 
                 <EditText
                     android:id="@+id/editTextPort"
-                    android:layout_width="60dp"
+                    android:layout_width="64dp"
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:hint="@string/default_port"
@@ -52,9 +52,9 @@
                 android:id="@+id/textViewMessage"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="50dp"
-                android:layout_marginRight="50dp"
-                android:layout_marginTop="50dp"
+                android:layout_marginLeft="40dp"
+                android:layout_marginRight="40dp"
+                android:layout_marginTop="40dp"
                 android:gravity="center"
                 android:text="@string/message"
                 android:textColor="@color/colorText"

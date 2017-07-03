@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AndroidWebFileServer</string>
+    <string name="message">您现在可以在同一局域网内的设备上通过上面的网址访问此设备上的文件。</string>
+    <string name="network_message">请先连接到网络。</string>
+</resources>

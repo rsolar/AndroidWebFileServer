@@ -24,12 +24,12 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int DEFAULT_PORT = 8080;
 
-    // INSTANCE OF ANDROID WEB FILE SERVER
+    // Instance of android web file server
     private MyWebFileServer androidWebFileServer;
     private BroadcastReceiver broadcastReceiverNetworkState;
     private static boolean isStarted = false;
 
-    // VIEWS
+    // Views
     private CoordinatorLayout coordinatorLayout;
     private TextView textViewIpAccess;
     private EditText editTextPort;
@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // INIT VIEWS
+        // Init views
         coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorLayout);
         textViewIpAccess = (TextView) findViewById(R.id.textViewIpAccess);
         editTextPort = (EditText) findViewById(R.id.editTextPort);
@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
         floatingActionButtonOnOff.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!isConnected()) {
+                if (isConnected()) {
                     if (!isStarted && startAndroidWebFileServer()) {
                         isStarted = true;
                         textViewMessage.setVisibility(View.VISIBLE);
@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
         });
         setIpAccess();
 
-        // INIT BROADCAST RECEIVER TO LISTEN NETWORK STATE CHANGED
+        // Init broadcast receiver to listen network state changed
         initBroadcastReceiverNetworkStateChanged();
     }
 
@@ -80,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
                 if (port == 0) {
                     throw new Exception();
                 }
-                String host = null; // bind to all interfaces by default
+                String host = null; // Bind to all interfaces by default
                 List<File> rootDirs = new ArrayList<File>();
                 rootDirs.add(new File(".").getAbsoluteFile());
                 boolean quiet = false;
@@ -104,10 +104,6 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
-    private void setIpAccess() {
-        textViewIpAccess.setText(getIpAccess());
-    }
-
     private void initBroadcastReceiverNetworkStateChanged() {
         final IntentFilter filters = new IntentFilter();
         filters.addAction("android.net.wifi.WIFI_STATE_CHANGED");
@@ -116,18 +112,29 @@ public class MainActivity extends AppCompatActivity {
         broadcastReceiverNetworkState = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
+                if (!isConnected() && isStarted) {
+                    isStarted = false;
+                    textViewMessage.setVisibility(View.INVISIBLE);
+                    floatingActionButtonOnOff.setBackgroundTintList(ContextCompat.getColorStateList(MainActivity.this, R.color.colorRed));
+                    editTextPort.setEnabled(true);
+                    Snackbar.make(coordinatorLayout, getString(R.string.network_message), Snackbar.LENGTH_LONG).show();
+                }
                 setIpAccess();
             }
         };
         super.registerReceiver(broadcastReceiverNetworkState, filters);
     }
 
-    private String getIpAccess() {
+    private void setIpAccess() {
+        textViewIpAccess.setText("http://" + getIpAddress() + ":");
+    }
+
+    private String getIpAddress() {
         String formatedIpAddress = Utils.getIPAddress(true);
         if ("".equals(formatedIpAddress)) {
             formatedIpAddress = "0:0:0:0";
         }
-        return "http://" + formatedIpAddress + ":";
+        return formatedIpAddress;
     }
 
     private int getPortFromEditTextPort() {
@@ -136,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean isConnected() {
-        return "".equals(Utils.getIPAddress(true));
+        return !"".equals(Utils.getIPAddress(true));
     }
 
     @Override

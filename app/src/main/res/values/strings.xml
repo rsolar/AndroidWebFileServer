@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">AndroidWebFileServer</string>
-    <string name="message">You can now access the Android Web File Server using a browser on devices connected to the same LAN.</string>
+    <string name="message">You can now access files on this device via the URL above using devices connected to the same LAN.</string>
     <string name="network_message">You must be connected to network when using this service.</string>
-    <string name="default_ip">http://000.000.000.000:</string>
-    <string name="default_port">8080</string>
+    <string name="default_ip" translatable="false">http://000.000.000.000:</string>
+    <string name="default_port" translatable="false">8080</string>
 </resources>
