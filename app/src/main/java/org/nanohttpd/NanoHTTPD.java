@@ -749,6 +749,7 @@ public abstract class NanoHTTPD {
                                     // add these two line to support multiple
                                     // files uploaded using the same field Id
                                     if (!fileName.isEmpty()) {
+                                        files.put("filename", fileName);
                                         if (pcount > 0)
                                             partName = partName + String.valueOf(pcount++);
                                         else

@@ -1,8 +1,6 @@
 <resources>
     <string name="app_name">AndroidWebFileServer</string>
     <string name="message">You can now access the Android Web File Server using a browser on devices connected to the same LAN.</string>
-    <string name="dialog_exit_message">Android Web File Server is currently running. The server will stop if you exit the application. Are you sure you want to exit?</string>
-    <string name="warning">Warning</string>
     <string name="network_message">You must be connected to network when using this service.</string>
     <string name="default_ip">http://000.000.000.000:</string>
     <string name="default_port">8080</string>

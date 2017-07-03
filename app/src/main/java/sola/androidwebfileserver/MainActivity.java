@@ -1,23 +1,20 @@
 package sola.androidwebfileserver;
 
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.view.KeyEvent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import org.nanohttpd.webserver.SimpleWebServer;
+import org.nanohttpd.webserver.MyWebFileServer;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -28,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int DEFAULT_PORT = 8080;
 
     // INSTANCE OF ANDROID WEB FILE SERVER
-    private SimpleWebServer androidWebFileServer;
+    private MyWebFileServer androidWebFileServer;
     private BroadcastReceiver broadcastReceiverNetworkState;
     private static boolean isStarted = false;
 
@@ -47,7 +44,6 @@ public class MainActivity extends AppCompatActivity {
         // INIT VIEWS
         coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorLayout);
         textViewIpAccess = (TextView) findViewById(R.id.textViewIpAccess);
-        setIpAccess();
         editTextPort = (EditText) findViewById(R.id.editTextPort);
         textViewMessage = (TextView) findViewById(R.id.textViewMessage);
         floatingActionButtonOnOff = (FloatingActionButton) findViewById(R.id.floatingActionButtonOnOff);
@@ -58,12 +54,12 @@ public class MainActivity extends AppCompatActivity {
                     if (!isStarted && startAndroidWebFileServer()) {
                         isStarted = true;
                         textViewMessage.setVisibility(View.VISIBLE);
-                        floatingActionButtonOnOff.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorGreen)));
+                        floatingActionButtonOnOff.setBackgroundTintList(ContextCompat.getColorStateList(MainActivity.this, R.color.colorGreen));
                         editTextPort.setEnabled(false);
                     } else if (stopAndroidWebFileServer()) {
                         isStarted = false;
                         textViewMessage.setVisibility(View.INVISIBLE);
-                        floatingActionButtonOnOff.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorRed)));
+                        floatingActionButtonOnOff.setBackgroundTintList(ContextCompat.getColorStateList(MainActivity.this, R.color.colorRed));
                         editTextPort.setEnabled(true);
                     }
                 } else {
@@ -71,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+        setIpAccess();
 
         // INIT BROADCAST RECEIVER TO LISTEN NETWORK STATE CHANGED
         initBroadcastReceiverNetworkStateChanged();
@@ -88,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
                 rootDirs.add(new File(".").getAbsoluteFile());
                 boolean quiet = false;
                 String cors = null;
-                androidWebFileServer = new SimpleWebServer(host, port, rootDirs, quiet, cors);
+                androidWebFileServer = new MyWebFileServer(host, port, rootDirs, quiet, cors);
                 androidWebFileServer.start();
                 return true;
             } catch (Exception e) {
@@ -138,29 +135,8 @@ public class MainActivity extends AppCompatActivity {
         return valueEditText.length() > 0 ? Integer.parseInt(valueEditText) : DEFAULT_PORT;
     }
 
-    public boolean isConnected() {
+    private boolean isConnected() {
         return "".equals(Utils.getIPAddress(true));
-    }
-
-    public boolean onKeyDown(int keyCode, KeyEvent evt) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (isStarted) {
-                new AlertDialog.Builder(this)
-                        .setTitle(R.string.warning)
-                        .setMessage(R.string.dialog_exit_message)
-                        .setPositiveButton(getResources().getString(android.R.string.ok), new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                finish();
-                            }
-                        })
-                        .setNegativeButton(getResources().getString(android.R.string.cancel), null)
-                        .show();
-            } else {
-                finish();
-            }
-            return true;
-        }
-        return false;
     }
 
     @Override

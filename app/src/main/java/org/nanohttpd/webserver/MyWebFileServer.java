@@ -48,12 +48,15 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-public class SimpleWebServer extends NanoHTTPD {
+import sola.androidwebfileserver.Utils;
+
+public class MyWebFileServer extends NanoHTTPD {
 
     /**
      * Default Index file names.
@@ -76,7 +79,7 @@ public class SimpleWebServer extends NanoHTTPD {
         mimeTypes();
         String text;
         try {
-            InputStream stream = SimpleWebServer.class.getResourceAsStream("/LICENSE.txt");
+            InputStream stream = MyWebFileServer.class.getResourceAsStream("/LICENSE.txt");
             ByteArrayOutputStream bytes = new ByteArrayOutputStream();
             byte[] buffer = new byte[1024];
             int count;
@@ -96,19 +99,19 @@ public class SimpleWebServer extends NanoHTTPD {
 
     protected List<File> rootDirs;
 
-    public SimpleWebServer(String host, int port, File wwwroot, boolean quiet, String cors) {
+    public MyWebFileServer(String host, int port, File wwwroot, boolean quiet, String cors) {
         this(host, port, Collections.singletonList(wwwroot), quiet, cors);
     }
 
-    public SimpleWebServer(String host, int port, File wwwroot, boolean quiet) {
+    public MyWebFileServer(String host, int port, File wwwroot, boolean quiet) {
         this(host, port, Collections.singletonList(wwwroot), quiet, null);
     }
 
-    public SimpleWebServer(String host, int port, List<File> wwwroots, boolean quiet) {
+    public MyWebFileServer(String host, int port, List<File> wwwroots, boolean quiet) {
         this(host, port, wwwroots, quiet, null);
     }
 
-    public SimpleWebServer(String host, int port, List<File> wwwroots, boolean quiet, String cors) {
+    public MyWebFileServer(String host, int port, List<File> wwwroots, boolean quiet, String cors) {
         super(host, port);
         this.quiet = quiet;
         this.cors = cors;
@@ -148,7 +151,7 @@ public class SimpleWebServer extends NanoHTTPD {
     }
 
     private String findIndexFileInDirectory(File directory) {
-        for (String fileName : SimpleWebServer.INDEX_FILE_NAMES) {
+        for (String fileName : MyWebFileServer.INDEX_FILE_NAMES) {
             File indexFile = new File(directory, fileName);
             if (indexFile.isFile()) {
                 return fileName;
@@ -176,10 +179,22 @@ public class SimpleWebServer extends NanoHTTPD {
     }
 
     protected String listDirectory(String uri, File f) {
-        String heading = "Directory " + uri;
-        StringBuilder msg =
-                new StringBuilder("<html><head><title>" + heading + "</title><style><!--\n" + "span.dirname { font-weight: bold; }\n" + "span.filesize { font-size: 75%; }\n"
-                        + "// -->\n" + "</style>" + "</head><body><h1>" + heading + "</h1>");
+        StringBuilder msg = new StringBuilder();
+        String title = "Directory " + uri;
+        String head = "<html><head><title>" + title + "</title>\n"
+                + "<style><!--\n"
+                + "span.dirname { font-weight: bold; }\n"
+                + "span.filesize { font-size: 75%; }\n"
+                + "--></style></head>\n"
+                + "<body>\n"
+                + "<h1>" + title + "</h1>\n";
+        msg.append(head);
+
+        String uploading = "<form enctype='multipart/form-data' method='POST'>\n"
+                + "<input type='file' name='file'>\n"
+                + "<br><input type='submit' name='submit' value='Upload'/>\n"
+                + "</form>\n";
+        msg.append(uploading);
 
         String up = null;
         if (uri.length() > 1) {
@@ -205,20 +220,20 @@ public class SimpleWebServer extends NanoHTTPD {
         }));
         Collections.sort(directories);
         if (up != null || directories.size() + files.size() > 0) {
-            msg.append("<ul>");
+            msg.append("<ul>\n");
             if (up != null || directories.size() > 0) {
-                msg.append("<section class=\"directories\">");
+                msg.append("<section class=\"directories\">\n");
                 if (up != null) {
-                    msg.append("<li><a rel=\"directory\" href=\"").append(up).append("\"><span class=\"dirname\">..</span></a></li>");
+                    msg.append("<li><a rel=\"directory\" href=\"").append(up).append("\"><span class=\"dirname\">..</span></a></li>\n");
                 }
                 for (String directory : directories) {
                     String dir = directory + "/";
-                    msg.append("<li><a rel=\"directory\" href=\"").append(encodeUri(uri + dir)).append("\"><span class=\"dirname\">").append(dir).append("</span></a></li>");
+                    msg.append("<li><a rel=\"directory\" href=\"").append(encodeUri(uri + dir)).append("\"><span class=\"dirname\">").append(dir).append("</span></a></li>\n");
                 }
-                msg.append("</section>");
+                msg.append("</section>\n");
             }
             if (files.size() > 0) {
-                msg.append("<section class=\"files\">");
+                msg.append("<section class=\"files\">\n");
                 for (String file : files) {
                     msg.append("<li><a href=\"").append(encodeUri(uri + file)).append("\"><span class=\"filename\">").append(file).append("</span></a>");
                     File curFile = new File(f, file);
@@ -231,11 +246,11 @@ public class SimpleWebServer extends NanoHTTPD {
                     } else {
                         msg.append(len / (1024 * 1024)).append(".").append(len % (1024 * 1024) / 10000 % 100).append(" MB");
                     }
-                    msg.append(")</span></li>");
+                    msg.append(")</span></li>\n");
                 }
-                msg.append("</section>");
+                msg.append("</section>\n");
             }
-            msg.append("</ul>");
+            msg.append("</ul>\n");
         }
         msg.append("</body></html>");
         return msg.toString();
@@ -296,18 +311,25 @@ public class SimpleWebServer extends NanoHTTPD {
         }
 
         if (f.isDirectory()) {
-            // First look for index files (index.html, index.htm, etc) and if
-            // none found, list the directory if readable.
-            String indexFile = findIndexFileInDirectory(f);
-            if (indexFile == null) {
-                if (f.canRead()) {
-                    // No index file, list the directory if it is readable
-                    return newFixedLengthResponse(Response.Status.OK, NanoHTTPD.MIME_HTML, listDirectory(uri, f));
-                } else {
-                    return getForbiddenResponse("Cannot access directory '" + uri + "'.");
+            if (Method.POST.equals(session.getMethod())) {
+                if (!f.canWrite()) {
+                    return getForbiddenResponse("Cannot write directory '" + uri + "'.");
                 }
+                return retrieveFile(session, f);
             } else {
-                return respond(headers, session, uri + indexFile);
+                // First look for index files (index.html, index.htm, etc) and if
+                // none found, list the directory if readable.
+                String indexFile = findIndexFileInDirectory(f);
+                if (indexFile == null) {
+                    if (f.canRead()) {
+                        // No index file, list the directory if it is readable
+                        return newFixedLengthResponse(Response.Status.OK, NanoHTTPD.MIME_HTML, listDirectory(uri, f));
+                    } else {
+                        return getForbiddenResponse("Cannot access directory '" + uri + "'.");
+                    }
+                } else {
+                    return respond(headers, session, uri + indexFile);
+                }
             }
         }
         String mimeTypeForFile = getMimeTypeForFile(uri);
@@ -446,6 +468,34 @@ public class SimpleWebServer extends NanoHTTPD {
             res = getForbiddenResponse("Reading file failed.");
         }
 
+        return res;
+    }
+
+    Response retrieveFile(IHTTPSession session, File f) {
+        Response res;
+        Map<String, String> files = new HashMap<String, String>();
+        try {
+            session.parseBody(files);
+        } catch (IOException ioe) {
+            return getInternalErrorResponse(ioe.getMessage());
+        } catch (ResponseException re) {
+            return newFixedLengthResponse(re.getStatus(), MIME_PLAINTEXT, re.getMessage());
+        }
+
+        File src = new File(files.get("file"));
+        File dst = new File(f.getAbsolutePath() + "/" + files.get("filename"));
+        try {
+            if (Utils.copy(src, dst)) {
+                res = newFixedLengthResponse(Response.Status.OK, MIME_PLAINTEXT, "Upload success.");
+                if (!this.quiet) {
+                    System.out.println("File " + files.get("filename") + " uploaded.");
+                }
+            } else {
+                res = getInternalErrorResponse("File already exist.");
+            }
+        } catch (IOException ioe) {
+            return getInternalErrorResponse("Upload fail.");
+        }
         return res;
     }
 
