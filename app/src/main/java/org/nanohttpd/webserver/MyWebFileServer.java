@@ -181,12 +181,17 @@ public class MyWebFileServer extends NanoHTTPD {
     protected String listDirectory(String uri, File f) {
         StringBuilder msg = new StringBuilder();
         String title = "Directory " + uri;
-        String head = "<html><head><title>" + title + "</title>\n"
-                + "<style><!--\n"
+        String head = "<html>\n"
+                + "<head>\n"
+                + "<title>" + title + "</title>\n"
+                + "<style>\n"
+                + "<!--\n"
                 + "span.dirname { font-weight: bold; }\n"
                 + "span.filesize { font-size: 75%; }\n"
-                + "body { font-family: \"Segoe UI\", Helvetica, Arial, sans-serif; }"
-                + "--></style></head>\n"
+                + "body { font-family: \"Segoe UI\", Helvetica, Arial, sans-serif; }\n"
+                + "-->\n"
+                + "</style>\n"
+                + "</head>\n"
                 + "<body>\n"
                 + "<h1>" + title + "</h1>\n";
         msg.append(head);
